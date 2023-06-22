@@ -14,37 +14,43 @@ import time
 
 # Create your objects here.
 ev3 = EV3Brick()
-rot = Motor(port = Port.A, positive_direction=Direction.CLOCKWISE,gears=None)
+
+#DECLARE THE COLOR AND TOUCH SENSORS
 color_sen = ColorSensor(port = Port.S1)
 touch_sen = TouchSensor(port = Port.S2)
-colors = []
+
+#DECLARE BOTH MOTORS FOR THE PUSH BLOCK AND FOR THE CONVEYOR BELT MOVEMENT
+rot = Motor(port = Port.A, positive_direction=Direction.CLOCKWISE,gears=None)
 push =  Motor(port = Port.B,positive_direction=Direction.CLOCKWISE,gears=None)
+colors = []
 
 # Write your program here.
 ev3.speaker.beep()
 
+#STABLISH THE POSITION 0 FOR THE CONVEYOR (MOTOR IN PORT A)
 def initialize():
-    while not touch_sen.pressed():
-        rot.run(-100)
-    rot.run(0)
+    while not touch_sen.pressed(): 
+        rot.run(-100)       #MOVE THE MOTOR A UNTIL THE BLOCK COLLECTER TOUCHES THE SENSOR
+    rot.run(0)                      
     rot.reset_angle(0)
 
+#READING THE COLORS PILLED IN THE BLOCK COLLECTOR
 def read_colors():
-    while len(colors)< 8:
+    while len(colors)< 8:   
         if Button.CENTER in ev3.buttons.pressed():
             break
         time.sleep(0.5)
         if color_sen.color() != None:
             if  color_sen.color() != Color.BLACK:
-                if color_sen.color() != Color.WHITE:
+                if color_sen.color() != Color.WHITE:            
                     if color_sen.color() != Color.BROWN:
-                        colors.append(color_sen.color())
-                        ev3.speaker.beep()
+                        colors.append(color_sen.color())    #READ THE COLORS EXCEPT BLACK, WHITE AND BROWN (TO AVOIT LECTURE ERRORS)
+                        ev3.speaker.beep()                  #DO TILL THE COLORS IN THE LIST ARE < 8
         print(colors)
         
-
+#LEAVE THE BLOCKS INTO THE RESPECTIVE CONTAINER
 def distribute():
-    for col in colors:
+    for col in colors:      #STABLISH A SPECIFIC POSITION FOR THE MOTOR IN EVERY COLOR AND ACTIVATING THE PUSH MOTOR TO THROW THE BLOCK
         if col == Color.BLUE:
             ev3.speaker.say("blue")
             rot.run_target(250,10,then=Stop.HOLD, wait=True)
